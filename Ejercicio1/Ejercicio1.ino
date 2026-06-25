@@ -44,7 +44,7 @@ void setup() {
   dht.begin();
   u8g2.begin();
 
-  preferences.begin("mi-app", false);
+  preferences.begin("st-tp4", false);
   valorUmbral = preferences.getFloat("umbral", 26.0);
 }
 
