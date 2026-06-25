@@ -32,6 +32,7 @@ bool sw2_flag = false;
 unsigned long tiempo_sw1 = 0;
 unsigned long tiempo_sw2 = 0;
 long int millisUltimoCheck = 0;
+bool ignorar_sw1 = false;
 
 void setup() {
   Serial.begin(115200);
@@ -86,6 +87,7 @@ void loop() {
         if (millis() - tiempo_sw1 >= 5000) {
           maquinaPantalla = P2;
           tiempo_sw1 = millis();
+          ignorar_sw1 = true;
         }
       } else sw1_flag = false;
 
@@ -99,11 +101,18 @@ void loop() {
       u8g2.print(valorUmbral);
       u8g2.sendBuffer();
 
-      if (sw1_actual) sw1_flag = true;
-      // Aumentar umbral 1 grado al presionar SW1
-      if (!sw1_actual && sw1_flag) {
-        valorUmbral++;
-        sw1_flag = false;
+      if (ignorar_sw1) {
+        if (!sw1_actual) {
+          ignorar_sw1 = false;
+          sw1_flag = false;
+        }
+      } else {
+        if (sw1_actual) sw1_flag = true;
+        // Aumentar umbral 1 grado al soltar SW1
+        if (!sw1_actual && sw1_flag) {
+          valorUmbral++;
+          sw1_flag = false;
+        }
       }
 
       // Lógica para SW2: Disminuir o Volver
@@ -124,18 +133,12 @@ void loop() {
           tiempo_sw2 = 0;
         }
       } else {
-          sw2_flag = false;
-          if (tiempo_sw2 != 0) {
-            valorUmbral--;
-            tiempo_sw2 = 0;
-          }
+        sw2_flag = false;
+        if (tiempo_sw2 != 0) {
+          valorUmbral--;
+          tiempo_sw2 = 0;
         }
-    }
-
+      }
       break;
   }
-
-  // Guardar el estado actual como anterior para la próxima iteración
-  sw1_anterior = sw1;
-  sw2_anterior = sw2;
 }
